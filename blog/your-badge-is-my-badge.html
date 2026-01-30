@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Your Badge is My Badge: Real World Lessons From Physical Security Engagements | The Adversary Co.</title>
+    <meta name="description" content="Real-world physical penetration testing insights revealing how physical access bypasses can compromise entire organizations">
+    <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="container">
+            <div class="nav-logo">
+                <img src="../images/a-co-logo-transparent.png" alt="The Adversary Co.">
+            </div>
+            <ul class="nav-menu">
+                <li><a href="../index.html">Home</a></li>
+                <li><a href="../blog.html" class="active">Blog</a></li>
+                <li><a href="../contact.html">Contact</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <article class="blog-post">
+        <div class="container">
+            <header class="post-header">
+                <h1>Your Badge is My Badge: Real World Lessons From Physical Security Engagements</h1>
+                <div class="post-meta">
+                    <span class="post-date">2025</span>
+                    <span class="post-author">By: Matt Millen</span>
+                </div>
+            </header>
+
+            <div class="post-content">
+                <h2>The Overlooked Side of Security</h2>
+                <p>The conversation around information security is dominated by ransomware, phishing campaigns, and zero-day exploits. Those threats are very real, but they often overshadow a simpler and equally important risk: physical access. If someone can get inside your facility, they don't need to rely on remote attacks or sophisticated malware to compromise your systems. A cloned badge, an unattended workstation, or even a well-meaning employee holding a door open can be enough to bypass millions of dollars in cybersecurity investment. The risk is even greater when you factor in malicious insiders, who already have legitimate access and the ability to move freely without raising suspicion.</p>
+
+                <h2>Putting Security to the Test</h2>
+                <p>At Pellera, our physical penetration tests are designed to reveal where technical controls, physical barriers, and human behavior intersect — and where those intersections fail, often creating direct paths for attackers to reach critical systems. In a recent engagement, we were tasked with assessing a facility marketed as "highly secure," equipped with modern access controls and on-site security personnel.</p>
+
+                <p>Before arriving on site, we conducted reconnaissance to identify publicly available information that could assist us in reaching our objectives. As is often the case, we uncovered a significant amount of sensitive information the organization had unintentionally exposed online. Key exposures identified during this phase included:</p>
+
+                <ul>
+                    <li>High-resolution photos of employee badges on LinkedIn and Facebook.</li>
+                    <li>Publicly available building maps showing layouts and entry points.</li>
+                    <li>Interior photos and videos posted by employees, clients, and business partners.</li>
+                    <li>Employee uniforms available for purchase from public sources.</li>
+                </ul>
+
+                <p>This intelligence allowed us to plan with precision. Prior to ever arriving on site, we knew what badge technology was in use, identified physical security technologies like anti-tailgate turnstiles at entrances, and even produced an indistinguishable employee badge in preparation for our test.</p>
+
+                <div class="post-image">
+                    <img src="../images/linkedin-photo.png" alt="Example of badge visible in LinkedIn photo">
+                </div>
+
+                <p>When it came time to execute, we arrived prepared with a long-range RFID reader hidden within a standard backpack and were able to covertly capture authentication data from active employee badges without raising suspicion. Writing the captured card data to our copycat employee badge bypassed the facility's entrance controls and allowed us to walk in undetected. Once inside, legitimacy came naturally — employees assumed that anyone who had made it past the initial access point and was wearing a badge belonged there. Using the building maps obtained during reconnaissance, we navigated directly to a networking closet. Using a traveler's hook, we quickly were able to bypass the lock and place a rogue device on a network switch, which quickly obtained an internal IP address due to a lack of Network Access Control (NAC) and established a remote connection to our cloud VPN endpoint – allowing us to remotely connect to the rogue device and perform attacks against the internal network. From there, it did not take long to escalate privileges. Weaknesses in the Active Directory environment allowed us to move from unauthenticated access to full domain administrator control. With that level of compromise, the ability to deploy ransomware or exfiltrate sensitive data was entirely within reach.</p>
+
+                <div class="post-image">
+                    <img src="../images/rogue-device.png" alt="Rogue device deployed in network closet">
+                </div>
+
+                <p>To further demonstrate impact, we expanded our assessment beyond initial entry and moved deeper into the facility. Our goal was to show how an attacker could layer multiple techniques to reach sensitive information and systems. In offices such as HR and finance, we encountered unlocked workstations, unsecured keys, sticky notes containing passwords, and open filing cabinets containing employee and client data. We strategically placed malicious USB devices, which when plugged in to an employee device would call back to our command and control server giving us an additional method of network access.</p>
+
+                <p>Ultimately we made our way to the corporate crown jewels: the on-site data center. Although protected with a strike plate guard, a lack of proper door seal allowed our consultants to quickly deploy an under-the-door tool (UDT) to bypass the lock entirely and gain access to our final objective. Within the data center, we had free access to the corporate IT infrastructure where further rogue device deployment or physical damage would have been effortless. Reaching this point underscored the real risk: once physical security breaks down, every layer of digital security can be put at risk.</p>
+
+                <div class="post-image">
+                    <img src="../images/bypass-meme.png" alt="Physical security bypass">
+                </div>
+
+                <h2>The Cracks in the Armor</h2>
+                <p>Physical penetration tests often show that security failures are rarely tied to a single issue. Instead, they often emerge from the overlap of human behavior and physical defenses. Seemingly small weaknesses can often add up, escalating to risks that impact the entire organization. These weaknesses generally fall into two areas: gaps in employee security awareness and gaps in physical security controls.</p>
+
+                <h3>Employee Security Awareness Gaps:</h3>
+                <ul>
+                    <li><strong>Human Nature:</strong> The most common initial access mechanism in physical penetration tests is exploitation of human behavior. People hold doors, avoid awkward moments, and assume the person behind them belongs there. A smile, a busy hallway, someone carrying boxes or coffee, or a badge on a lanyard that looks "about right" lowers defenses. This is exactly what makes tailgating (following an employee through a secured door without badging in) and piggybacking (slipping in while someone actively holds the door open) so effective.</li>
+                    
+                    <li><strong>Authority and Conflict Avoidance:</strong> Confidence, a uniform, a tool bag, or something as simple as a clipboard creates instant credibility. Add a quick purpose statement like "facilities sent me to check on the badge reader by HR, something about it having a mind of its own" and most people will not challenge it. Employees do not want to create a scene or be wrong in front of peers. That hesitation can be all an attacker needs to pass through restricted barriers and escalate access.</li>
+                    
+                    <li><strong>Online Exposure Risks:</strong> In the age of social media, organizations often share far more than they realize. High-resolution photos of badges, interior spaces, and equipment appear on company websites, LinkedIn profiles, and partner marketing. These images can reveal badge designs, security controls, floor layouts, and even details about vendors with access to the facility. Attackers use this information to craft credible pretexts, clone badges, and plan routes long before they ever set foot on site.</li>
+                    
+                    <li><strong>Cutting Corners:</strong> Over time, employees normalize small deviations in security, and those become reliable openings for attackers. A door that doesn't fully latch, a contractor who looks familiar, or a workstation left unlocked stops drawing attention once it happens often enough. In busy environments, an unfamiliar face blends into the background, and in hybrid workplaces, people assume someone else has already verified visitors. These habits are compounded by everyday oversights — badges left on desks, keys left in cabinet locks, or sensitive papers sitting out in the open. None of these behaviors are malicious, but together they create an environment where an attacker can move freely and gather valuable information without challenge.</li>
+                </ul>
+
+                <h3>Physical Security Control Gaps:</h3>
+                <ul>
+                    <li><strong>Door Hardware Weaknesses:</strong> Large facilities often struggle with consistent quality control on door hardware. Small issues like improperly seated doors, exposed or unprotected latches, and poor seals may go unnoticed during daily operations but create easy opportunities for bypass. Accessibility requirements, such as ADA-mandated lever handles can also introduce weaknesses if they aren't paired with proper protective measures. Together, these gaps allow attackers to slip past what appear to be secure barriers using simple tools.</li>
+                </ul>
+
+                <div class="video-embed">
+                    <iframe width="840" height="473" src="https://www.youtube.com/embed/G1s7r5FCtIo" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+                </div>
+
+                <ul>
+                    <li><strong>Exit Functionality Weakness:</strong> Fire and life-safety codes require doors to release quickly in an emergency, usually via request-to-exit (REX) sensors or crash bars. Those systems serve an essential purpose, but when they're poorly configured or improperly installed they can create exploitable openings. Gaps in seals or strike plates, improperly seated hardware, and incorrectly mounted REX sensors all increase the risk that an attacker can manipulate the door's functionality without force. Compliance features designed to keep people safe can unintentionally weaken perimeter security if they aren't paired with appropriate protective measures and monitoring.</li>
+                </ul>
+
+                <div class="post-image">
+                    <img src="../images/can-of-air.png" alt="REX sensor bypass technique">
+                </div>
+
+                <ul>
+                    <li><strong>Access Control Badge Weaknesses:</strong> Long-range badge capture tools can read and replicate many common employee badges from a distance — meaning an attacker doesn't always need direct contact to bypass electronic access controls. More often than not we find client badge systems utilize legacy designs that use static identifiers or weak protocols with little-to-no cryptographic protection, making it trivial to capture and reproduce badge credentials. At Pellera we maintain purpose-built long-range readers used in our engagements, built by adapting legitimate long-range reader hardware and integrating commercially available capture boards such as Doppleganger — hardware that's openly sold to the public via the Practical Physical Exploitation store. In our testing these readers have captured common badge formats at distances up to roughly two feet while concealed in an ordinary laptop bag or backpack, which is precisely what makes the threat practical and easy for motivated attackers or penetration testers alike.</li>
+                </ul>
+
+                <div class="post-image">
+                    <img src="../images/rfid-backpack.png" alt="Long-range RFID reader concealed in backpack">
+                </div>
+
+                <div class="post-image">
+                    <img src="../images/doppleganger-data.png" alt="Captured badge data from Doppleganger">
+                </div>
+
+                <ul>
+                    <li><strong>Security Barriers:</strong> Anti-tailgating turnstiles or similar devices are often installed but rarely monitored in practice, offering little resistance to a motivated attacker. Even when these systems are designed to trigger alerts on unintended use, we frequently find they don't — either due to misconfiguration or weaknesses in the product itself. This reinforces the importance of regularly testing barriers to confirm they actually perform as intended and provide more than a false sense of security.</li>
+                    
+                    <li><strong>Weak Access Control Oversight:</strong> Unrevoked guest badges, recycled cards, or lingering ex-employee credentials are frequently left accessible, granting intruders easy entry. Additionally, badge activity logs rarely trigger real-time action. We often uncover "impossible" reads—such as off-shift access or credentials used in role-mismatched locations—that suggest credential duplication, yet these go uninvestigated.</li>
+                </ul>
+
+                <h2>Recommendations: Compound Your Defense</h2>
+                <p>Closing gaps in physical security requires a blend of vigilance, process, and technology. The goal isn't to eliminate every risk, rather, to raise the bar so high that attackers move on to easier targets. The vulnerabilities mentioned in this post are not unusual. In fact, they come up across industries, in organizations large and small. The good news is that most of these weaknesses can be addressed with straightforward improvements.</p>
+
+                <ul>
+                    <li><strong>Strengthen Security Awareness:</strong> Employees should be trained to recognize and challenge behaviors attackers exploit, like tailgating or someone slipping through a door on politeness alone. They should feel empowered to question unfamiliar faces or contractors without worrying about being "rude." Awareness also extends to daily habits — locking cabinets, securing workstations, and not leaving confidential information lying around. Online, staff should understand that photos of badges, office layouts, or even their desks can be leveraged by attackers long before they show up at the building. Creating a culture where employees see themselves as part of the security perimeter is one of the most effective defenses any organization can build.</li>
+                    
+                    <li><strong>Upgrade Badge Technology:</strong> Replace low-frequency proximity cards or legacy iCLASS credentials with modern, encrypted platforms such as HID SEOS with Elite Keys or iCLASS SE that implement AES-based cryptography. These platforms provide mutual authentication between card and reader, making them resistant to cloning and adversary-in-the-middle (AITM) attacks that plague older systems. Additionally, clean up credential management to include proper logging, revoke unused badges, and ensure guest or contractor cards are properly secured.</li>
+                    
+                    <li><strong>Audit Physical Security Mechanisms:</strong> Don't assume physical barriers are working as designed. Regularly review and test door seals, latch plates, closing mechanisms, REX sensors, crash bars, and turnstiles. The only way to know if they'll hold against an attacker is to test them under real-world conditions, including during a physical penetration test.</li>
+                    
+                    <li><strong>Harden IT Security Defenses:</strong> Physical access almost always leads to network access. Controls like Network Access Control (NAC), endpoint hardening, and proper workstation lock policies help limit the damage when an attacker does get inside. Pair those with continuous security assessments — including penetration testing of Active Directory and internal systems — to ensure weaknesses are caught before they're exploited.</li>
+                </ul>
+
+                <h2>Test, Learn, Strengthen, Repeat</h2>
+                <p>Physical security is often treated as an afterthought in information security, but our engagements continue to prove the opposite: once an attacker is inside, every other control is at risk. A cloned badge, a bypassed door, or an employee's moment of trust can be all it takes to compromise systems and data. The value of physical penetration testing isn't just in showing what's possible — it's in showing organizations where to focus their defenses and exposing the cracks before a real adversary does.</p>
+
+                <p>Security isn't a one-time exercise. Doors wear down, controls drift, and employees fall back into old habits. Regular testing helps identify new weaknesses, confirm whether fixes are holding, and reinforce awareness over time. The cycle is simple: Test, Learn, Strengthen, and Repeat.</p>
+            </div>
+
+            <div class="post-footer">
+                <a href="../blog.html" class="btn btn-secondary">← Back to Blog</a>
+            </div>
+        </div>
+    </article>
+
+    <footer>
+        <div class="container">
+            <p>&copy; 2026 The Adversary Co. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script src="../js/main.js"></script>
+</body>
+</html>

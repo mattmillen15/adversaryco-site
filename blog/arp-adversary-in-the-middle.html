@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vulnerability Spotlight: ARP Adversary-in-the-Middle (AITM) | The Adversary Co.</title>
+    <meta name="description" content="ARP poisoning attack technique that enables interception of Kerberos authentication traffic to steal domain credentials">
+    <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="container">
+            <div class="nav-logo">
+                <img src="../images/a-co-logo-transparent.png" alt="The Adversary Co.">
+            </div>
+            <ul class="nav-menu">
+                <li><a href="../index.html">Home</a></li>
+                <li><a href="../blog.html" class="active">Blog</a></li>
+                <li><a href="../contact.html">Contact</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <article class="blog-post">
+        <div class="container">
+            <header class="post-header">
+                <h1>Vulnerability Spotlight: ARP Adversary-in-the-Middle (AITM)</h1>
+                <div class="post-meta">
+                    <span class="post-date">July 2025</span>
+                    <span class="post-author">By: Matt Millen</span>
+                </div>
+            </header>
+
+            <div class="post-content">
+                <h2>Overview</h2>
+                <p>ARP poisoning, also known as ARP spoofing, is a link layer attack technique that allows an adversary on the local network to intercept, modify, or redirect traffic between systems by manipulating ARP tables. This type of attack is commonly used to perform adversary-in-the-middle (AITM) operations, enabling the interception of sensitive data such as credentials or authentication exchanges.</p>
+
+                <h2>Attack Walkthrough</h2>
+                <p>In a standard ARP poisoning attack, an attacker on the local network sends forged ARP responses that associate their MAC address with the IP address of a legitimate host, such as the default gateway. This poisons the ARP caches of nearby hosts, causing network traffic intended for the poisoned hosts to be redirected to the attacker and enabling interception, manipulation, or disruption of network communications.</p>
+
+                <p>This technique can be leveraged to intercept Kerberos authentication traffic between domain-joined computers and the domain controller. When a domain account initiates Kerberos authentication, an AS-REQ message is sent to the domain controller. This prompts an AS-REP message from the domain controller that contains encrypted authentication material that can be extracted and potentially cracked offline to recover the domain account's password.</p>
+
+                <p>Tools like <a href="https://github.com/Yaxxine7/ASRepCatcher" target="_blank" rel="noopener noreferrer">ASRepCatcher</a> are designed to intercept AS-REP messages as they are routed through the attacker's system. Once intercepted, the encrypted authentication material is displayed in a format suitable for offline hash cracking tools such as Hashcat. The screenshot below shows an example of this attack in action, where a domain user's AS-REP hash was intercepted during normal network authentication activity.</p>
+
+                <div class="post-image">
+                    <img src="../images/arp-aitm.png" alt="ARP AITM Attack Example">
+                </div>
+
+                <h2>Security Impact and Risk</h2>
+                <p>This attack technique enables an attacker to intercept encrypted domain credentials for any user authenticating on the network without requiring direct interaction with the domain controller or triggering alerts. Intercepted AS-REP messages can be cracked offline, allowing an attacker to recover valid domain credentials that may grant access to sensitive systems, applications, or information. The ability to obtain credentials in this manner poses serious risks:</p>
+
+                <ul>
+                    <li><strong>Initial Access or Privilege Escalation:</strong> A compromised user account can provide an entry point into internal systems or allow movement throughout the network. If the attacker is within broadcast range of a domain controller, this could have significantly more impact, as it would allow the interception of AS-REP messages from hosts outside of broadcast range.</li>
+                    <li><strong>Persistence:</strong> Compromised credentials may allow long-term persistence if domain account passwords are not periodically rotated.</li>
+                    <li><strong>Low Likelihood of Detection:</strong> Attacker uses traffic interception, making it difficult to detect with standard network monitoring tools.</li>
+                </ul>
+
+                <h2>Remediation and Hardening Recommendations</h2>
+                <p>Mitigating the risk associated with this attack technique involves a combination of network-level protections, switch hardening, and continuous monitoring for suspicious ARP behavior. The following recommendations will strengthen your resiliency against ARP poisoning attacks:</p>
+
+                <ul>
+                    <li>Enable Dynamic ARP Inspection (DAI) on all VLANs and ensure DHCP Snooping is properly configured where applicable.</li>
+                    <li>Use static ARP entries for critical systems like domain controllers and default gateways.</li>
+                    <li>Harden switch port security by limiting ports to known MAC addresses and enabling 802.1x where possible.</li>
+                    <li>Restrict direct communication between clients using Private VLANs or VLAN ACLs to block peer-to-peer traffic and reduce lateral attack paths.</li>
+                    <li>Monitor for ARP spoofing activity using tools like <a href="https://www.techtarget.com/searchsecurity/tutorial/How-to-use-arpwatch-to-monitor-network-changes" target="_blank" rel="noopener noreferrer">arpwatch</a> or IDS/IPS with ARP detection capabilities.</li>
+                    <li>Enforce strong password policies and ensure legacy encryption like RC4 is disabled in favor of stronger algorithms (e.g., AES) to increase hash cracking difficulty. Additionally, monitor for Kerberos authentication requests that use RC4, as it likely indicates malicious activity, especially if RC4 is disabled.</li>
+                </ul>
+
+                <h2>References</h2>
+                <ul class="references">
+                    <li><a href="https://github.com/Yaxxine7/ASRepCatcher" target="_blank" rel="noopener noreferrer">ASRepCatcher - GitHub</a></li>
+                    <li><a href="https://www.techtarget.com/searchsecurity/tutorial/How-to-use-arpwatch-to-monitor-network-changes" target="_blank" rel="noopener noreferrer">How to use arpwatch to monitor network changes</a></li>
+                </ul>
+            </div>
+
+            <div class="post-footer">
+                <a href="../blog.html" class="btn btn-secondary">← Back to Blog</a>
+            </div>
+        </div>
+    </article>
+
+    <footer>
+        <div class="container">
+            <p>&copy; 2026 The Adversary Co. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script src="../js/main.js"></script>
+</body>
+</html>

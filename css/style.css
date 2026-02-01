@@ -311,6 +311,24 @@ body {
     text-decoration: underline;
 }
 
+.post-content blockquote {
+    background-color: var(--light-bg);
+    border: 2px solid var(--primary-red);
+    border-left: 6px solid var(--primary-red);
+    padding: 2rem;
+    margin: 2rem 0;
+    border-radius: 8px;
+    font-style: italic;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+}
+
+.post-content blockquote p {
+    color: var(--white);
+    margin-bottom: 0;
+    font-size: 1.1rem;
+    line-height: 1.8;
+}
+
 .post-image {
     margin: 2rem auto;
     text-align: center;

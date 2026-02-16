@@ -140,9 +140,25 @@ body {
 
 .post-card {
     background-color: var(--light-bg);
-    padding: 2rem;
     border-radius: 8px;
     border-top: 3px solid var(--primary-red);
+    overflow: hidden;
+}
+
+.post-card-image {
+    width: 100%;
+    height: 200px;
+    overflow: hidden;
+}
+
+.post-card-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.post-card-body {
+    padding: 1.5rem 2rem 2rem;
 }
 
 .post-card h3 {
@@ -356,6 +372,48 @@ body {
 
 .references a {
     color: var(--primary-red);
+}
+
+.table-wrapper {
+    margin: 1.5rem 0;
+    overflow-x: auto;
+}
+
+.cve-table {
+    width: 100%;
+    border-collapse: collapse;
+    background-color: var(--medium-bg);
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.cve-table thead th {
+    background-color: var(--primary-red);
+    color: var(--white);
+    padding: 1rem 1.5rem;
+    text-align: left;
+    font-weight: 600;
+}
+
+.cve-table tbody td {
+    padding: 0.75rem 1.5rem;
+    color: var(--gray);
+    border-bottom: 1px solid var(--light-bg);
+}
+
+.cve-table tbody td:first-child {
+    color: var(--white);
+    font-family: 'Courier New', monospace;
+    white-space: nowrap;
+    font-weight: 600;
+}
+
+.cve-table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+.cve-table tbody tr:hover {
+    background-color: var(--light-bg);
 }
 
 .video-embed {

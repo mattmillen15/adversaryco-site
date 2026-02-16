@@ -28,7 +28,7 @@ body {
 
 .navbar {
     background-color: var(--dark-bg);
-    padding: 1rem 0;
+    padding: 0;
     position: sticky;
     top: 0;
     z-index: 100;
@@ -66,16 +66,53 @@ body {
 
 .hero {
     background-color: var(--dark-bg);
-    padding: 0;
     text-align: center;
-    border-bottom: 1px solid var(--light-bg);
+    padding: 2rem 0 3rem;
+    position: relative;
+}
+
+.hero::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 600px;
+    height: 600px;
+    background: radial-gradient(circle, rgba(230, 57, 70, 0.08) 0%, transparent 70%);
+    pointer-events: none;
 }
 
 .hero-logo {
-    max-width: 700px;
+    max-width: 550px;
     width: 100%;
     display: block;
     margin: 0 auto;
+    position: relative;
+    z-index: 1;
+}
+
+.section-heading {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    margin-bottom: 3rem;
+}
+
+.section-heading h2 {
+    font-size: 2.4rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 3px;
+    color: var(--gray);
+    white-space: nowrap;
+    margin-bottom: 0;
+}
+
+.heading-line {
+    flex: 1;
+    height: 1px;
+    background: linear-gradient(to right, transparent, var(--primary-red), transparent);
 }
 
 .btn {
@@ -111,16 +148,19 @@ body {
     color: var(--dark-bg);
 }
 
-.recent-posts h2,
 .page-header h1 {
     font-size: 2.5rem;
-    margin-bottom: 3rem;
+    margin-bottom: 0;
     text-align: center;
 }
 
-.recent-posts,
+.recent-posts {
+    padding: 0 0 5rem;
+    background-color: var(--dark-bg);
+}
+
 .blog-section {
-    padding: 5rem 0;
+    padding: 2rem 0 5rem;
     background-color: var(--dark-bg);
 }
 
@@ -188,9 +228,8 @@ body {
 
 .page-header {
     background: linear-gradient(135deg, var(--medium-bg) 0%, var(--dark-bg) 100%);
-    padding: 4rem 0;
+    padding: 1.5rem 0;
     text-align: center;
-    border-bottom: 1px solid var(--light-bg);
 }
 
 .page-header p {
@@ -200,7 +239,7 @@ body {
 }
 
 .contact-section {
-    padding: 5rem 0;
+    padding: 1.5rem 0 5rem;
     background-color: var(--dark-bg);
 }
 
@@ -451,34 +490,120 @@ footer {
 }
 
 @media (max-width: 768px) {
+    .navbar {
+        padding: 0.25rem 0;
+    }
+
+    .nav-logo img {
+        height: 60px;
+    }
+
     .nav-menu {
-        gap: 1rem;
+        gap: 0.75rem;
     }
-    
+
     .nav-menu a {
-        padding: 0.5rem;
+        padding: 0.4rem 0.5rem;
+        font-size: 0.85rem;
     }
-    
+
+    .hero {
+        padding: 1.5rem 0 2rem;
+    }
+
     .hero-logo {
-        max-width: 500px;
+        max-width: 300px;
     }
-    
-    .recent-posts h2,
-    .page-header h1 {
-        font-size: 2rem;
+
+    .hero::before {
+        width: 300px;
+        height: 300px;
     }
-    
+
+    .section-heading {
+        gap: 1rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .section-heading h2 {
+        font-size: 1.4rem;
+        letter-spacing: 2px;
+    }
+
+    .recent-posts {
+        padding: 0 0 3rem;
+    }
+
+    .blog-section {
+        padding: 1.5rem 0 3rem;
+    }
+
     .posts-grid,
     .blog-grid {
         grid-template-columns: 1fr;
     }
-    
-    .post-header h1 {
-        font-size: 2rem;
+
+    .page-header {
+        padding: 1rem 0;
     }
-    
+
+    .page-header h1 {
+        font-size: 1.5rem;
+    }
+
+    .contact-section {
+        padding: 1rem 0 3rem;
+    }
+
+    .contact-box a {
+        font-size: 1rem;
+    }
+
+    .post-header {
+        margin-bottom: 2rem;
+        padding-bottom: 1rem;
+    }
+
+    .post-header h1 {
+        font-size: 1.5rem;
+    }
+
     .post-meta {
         flex-direction: column;
         gap: 0.5rem;
+    }
+
+    .post-content h2 {
+        font-size: 1.4rem;
+    }
+
+    .post-content h3 {
+        font-size: 1.2rem;
+    }
+
+    .post-content blockquote {
+        padding: 1rem;
+    }
+
+    .post-content blockquote p {
+        font-size: 1rem;
+    }
+
+    .cve-table thead th {
+        padding: 0.5rem 0.75rem;
+        font-size: 0.85rem;
+    }
+
+    .cve-table tbody td {
+        padding: 0.5rem 0.75rem;
+        font-size: 0.85rem;
+    }
+
+    .post-footer {
+        margin-top: 2rem;
+    }
+
+    footer {
+        padding: 1.5rem 0;
     }
 }
